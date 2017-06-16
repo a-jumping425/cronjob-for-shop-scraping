@@ -21,17 +21,7 @@ class CronjobForShopScraping {
         'telemart' => 'www.telemart.pk/',
         'myshop' => 'myshop.pk/',
     ];
-    private $outside_shops_search = [
-        's_ishopping' => 'www.ishopping.pk/search/?q',
-        's_shophive' => 'www.shophive.com/catalogsearch/result/?q',
-        's_daraz' => 'www.daraz.pk/catalog/?q',
-        's_mega' => 'www.mega.pk/search/',
-        // 's_homeshopping' => 'homeshopping.pk/',
-        's_yayvo' => 'yayvo.com/search/result/?q',
-        's_vmart' => 'www.vmart.pk/?subcats=Y&status=A',
-        's_telemart' => 'www.telemart.pk/catalogsearch/result/?q',
-        's_myshop' => 'myshop.pk/catalogsearch/result/?q',
-    ];
+
     private $invalid_offers = [];
 
 	public function __construct() {
@@ -61,19 +51,10 @@ class CronjobForShopScraping {
         $site = null;
         $product_data = 0;
 
-        foreach ($this->outside_shops_search as $key => $shop_url) {
+        foreach ($this->outside_shops as $key => $shop_url) {
             if( strpos($offer['url'], $shop_url) !== false ) {
-                $site = [ 'shop' => $key, 'url' => $offer['url'] ];
+                $site = ['shop' => $key, 'url' => $offer['url']];
                 break;
-            }
-        }
-
-        if($site == null) {
-            foreach ($this->outside_shops as $key => $shop_url) {
-                if( strpos($offer['url'], $shop_url) !== false ) {
-                    $site = ['shop' => $key, 'url' => $offer['url']];
-                    break;
-                }
             }
         }
 
@@ -83,40 +64,23 @@ class CronjobForShopScraping {
                 case 'ishopping':
                     $product_data = Scrape_ishopping::get_data_in_product_page($site['url']);
                     break;
-                case 's_ishopping':
-                    $product_data = Scrape_ishopping::get_data_in_search_page($site['url']);
-                    break;
                 case 'shophive':
-                    break;
-                case 's_shophive':
+                    $product_data = Scrape_shophive::get_data_in_product_page($site['url']);
                     break;
                 case 'daraz':
-                    break;
-                case 's_daraz':
+                    $product_data = Scrape_daraz::get_data_in_product_page($site['url']);
                     break;
                 case 'mega':
                     break;
-                case 's_mega':
-                    break;
                 case 'homeshopping':
-                    break;
-                case 's_homeshopping':
                     break;
                 case 'yayvo':
                     break;
-                case 's_yayvo':
-                    break;
                 case 'vmart':
-                    break;
-                case 's_vmart':
                     break;
                 case 'telemart':
                     break;
-                case 's_telemart':
-                    break;
                 case 'myshop':
-                    break;
-                case 's_myshop':
                     break;
             }
         }
