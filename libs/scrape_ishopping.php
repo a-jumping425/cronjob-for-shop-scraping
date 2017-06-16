@@ -9,13 +9,41 @@ class Scrape_ishopping {
         try {
 //            echo '<br>get_data_in_search_page: ' . $url;
 
-            $html = \simplehtmldom_1_5\file_get_html($url);
-            $right_side = $html->find('div.right-p-side', 0);
+            $curl = curl_init();
 
-            $price = $right_side->find('span.price', 0)->plaintext;
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => $url,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => "",
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => "GET",
+                CURLOPT_HTTPHEADER => array(
+                    "cache-control: no-cache"
+                ),
+            ));
+
+            $response = curl_exec($curl);
+            $err = curl_error($curl);
+
+            curl_close($curl);
+
+            if ($err) {
+//                echo "cURL Error #:" . $err;
+                return 0;
+            }
+
+            $html = \simplehtmldom_1_5\str_get_html($response);
+            $product = $html->find('div.right-p-side', 0);
+
+            if( !$product )
+                return 0;
+
+            $price = $product->find('span.price', 0)->plaintext;
             $price = floatval(preg_replace('/[^\d\.]+/', '', $price));
 
-            $availability = $right_side->find('p.availability span.value', 0)->plaintext;
+            $availability = $product->find('p.availability span.value', 0)->plaintext;
 
 //            echo "<br>$price, $availability";
 

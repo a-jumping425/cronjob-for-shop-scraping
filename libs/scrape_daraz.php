@@ -9,8 +9,28 @@ class Scrape_daraz {
         try {
 //            echo '<br>get_data_in_search_page: ' . $url;
 
-            $html = \simplehtmldom_1_5\file_get_html($url);
+            $curl = curl_init($url);
+
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+
+            $response = curl_exec($curl);
+            $err = curl_error($curl);
+
+            curl_close($curl);
+
+            if ($err) {
+//                echo "cURL Error #:" . $err;
+                return 0;
+            }
+
+            $html = \simplehtmldom_1_5\str_get_html($response);
             $product = $html->find('div.details-footer', 0);
+
+            if( !$product )
+                return 0;
 
             $price = $product->find('span.price', 0)->find('span', 1)->plaintext;
             $price = floatval(preg_replace('/[^\d\.]+/', '', $price));
