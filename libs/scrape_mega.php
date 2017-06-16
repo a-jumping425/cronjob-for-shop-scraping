@@ -45,6 +45,11 @@ class Scrape_mega {
             $price = floatval(preg_replace('/[^\d\.]+/', '', $price));
 
             $availability = trim( $product->find('div.stock-detail span', 1)->plaintext );
+            if( stripos($availability, 'Available') !== false ) {
+                $availability = "In stock";
+            } else {
+                $availability = "Out of stock";
+            }
 
 //            echo "<br>$price, $availability";
 
