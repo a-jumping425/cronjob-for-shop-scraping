@@ -102,6 +102,8 @@ class CronjobForShopScraping {
      * Cronjob execution
      */
 	public function cronjob_execution() {
+	    global $wpdb;
+
         // Include libraries
         include_once (__DIR__ . '/libs/simple_html_dom.php');
         include_once (__DIR__ . '/libs/scrape_ishopping.php');
@@ -126,18 +128,29 @@ class CronjobForShopScraping {
             if( !count($offers) ) continue;
 
             $min_price = 999999999999;
-            foreach ($offers as $offer) {
+            foreach ($offers as &$offer) {
                 $data = $this->scrape_data_from_url($product->id, $product->title, $offer);
-
-                if( !$data )
-                    continue;
-
-                if($min_price > $data[0]) {
-                    $min_price = $data[0];
-                }
-
 //                var_dump($data);
+
+                if( $data ) {
+                    if($min_price > $data[0]) {
+                        $min_price = $data[0];
+                    }
+
+                    $offer['price'] = $data[0];
+                    $offer['title'] = $data[1];
+                } else {
+                    if($min_price > $offer['price']) {
+                        $min_price = $offer['price'];
+                    }
+                }
             }
+//            var_dump($offers);
+
+            $wpdb->query( $wpdb->prepare("UPDATE wp_postmeta SET meta_value = %s WHERE post_id = %d AND meta_key='aps-product-offers';", serialize($offers), $product->id) );
+            $wpdb->query( $wpdb->prepare("UPDATE wp_postmeta SET meta_value = %s WHERE post_id = %d AND meta_key='aps-product-price';", $min_price, $product->id) );
+
+            unset($offer);
         }
 
         echo "<br>invalid_offers";
