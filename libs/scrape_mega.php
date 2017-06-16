@@ -7,7 +7,7 @@
 class Scrape_mega {
     public function get_data_in_product_page($url) {
         try {
-            echo '<br>get_data_in_search_page: ' . $url;
+//            echo '<br>get_data_in_search_page: ' . $url;
 
             $curl = curl_init();
 
