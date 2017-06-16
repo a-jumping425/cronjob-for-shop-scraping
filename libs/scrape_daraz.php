@@ -35,7 +35,12 @@ class Scrape_daraz {
             $price = $product->find('span.price', 0)->find('span', 1)->plaintext;
             $price = floatval(preg_replace('/[^\d\.]+/', '', $price));
 
-            $availability = "In stock";     // This store haven't stock status.
+            $availability = $product->find('div.actions span.label', 0)->plaintext;
+            if( stripos($availability, 'buy now') !== false ) {
+                $availability = "In stock";
+            } else {
+                $availability = "Out of stock";
+            }
 
 //            echo "<br>$price, $availability";
 
