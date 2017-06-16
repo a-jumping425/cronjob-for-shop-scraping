@@ -49,7 +49,7 @@ class CronjobForShopScraping {
 
     private function scrape_data_from_url($pid, $ptitle, $offer) {
         $site = null;
-        $product_data = 0;
+        $product_data = null;
 
         foreach ($this->outside_shops as $key => $shop_url) {
             if( strpos($offer['url'], $shop_url) !== false ) {
@@ -71,25 +71,31 @@ class CronjobForShopScraping {
                     $product_data = Scrape_daraz::get_data_in_product_page($site['url']);
                     break;
                 case 'mega':
+                    $product_data = Scrape_mega::get_data_in_product_page($site['url']);
                     break;
                 case 'homeshopping':
+                    $product_data = Scrape_homeshopping::get_data_in_product_page($site['url']);
                     break;
                 case 'yayvo':
+                    $product_data = Scrape_yayvo::get_data_in_product_page($site['url']);
                     break;
                 case 'vmart':
+                    $product_data = Scrape_vmart::get_data_in_product_page($site['url']);
                     break;
                 case 'telemart':
+                    $product_data = Scrape_telemart::get_data_in_product_page($site['url']);
                     break;
                 case 'myshop':
+                    $product_data = Scrape_myshop::get_data_in_product_page($site['url']);
                     break;
             }
         }
 
-        if ($product_data == 0) {   // error
+        if( !$product_data ) {   // error
             $this->invalid_offers[] = ['pid' => $pid, 'ptitle' => $ptitle, 'offer_url' => $offer['url']];
-        } else {    // success
-            var_dump($product_data);
         }
+
+        return $product_data;
     }
 
     /**
@@ -109,17 +115,23 @@ class CronjobForShopScraping {
         include_once (__DIR__ . '/libs/scrape_myshop.php');
 
         // Set execution time
-        set_time_limit(3600);
+        set_time_limit(3600*10);
 
 	    echo '--- Started cronjob ---<br>';
 
         $products = $this->get_aps_products();
         foreach ($products as $product) {
             $offers = unserialize($product->offers);
+            
             if( !count($offers) ) continue;
+
 //            var_dump($offers);
+
             foreach ($offers as $offer) {
                 $data = $this->scrape_data_from_url($product->id, $product->title, $offer);
+                if( !$data )
+                    continue;
+                var_dump($data);
             }
         }
 
