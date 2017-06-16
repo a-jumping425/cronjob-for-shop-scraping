@@ -28,7 +28,7 @@ class Scrape_ishopping {
 
     public function get_data_in_search_page($url) {
         try {
-//        echo '<br>get_data_in_search_page: '. $url;
+//            echo '<br>get_data_in_search_page: '. $url;
 
             $parts = parse_url($url);
             parse_str($parts['query'], $query);
@@ -54,7 +54,7 @@ class Scrape_ishopping {
             }
 
             $url = "https://eucs4.klevu.com/cloud-search/n-search/search?" . $param_str;
-//        echo $url .'<br>';
+//            echo $url .'<br>';
 
             $curl = curl_init();
 
@@ -77,7 +77,7 @@ class Scrape_ishopping {
             curl_close($curl);
 
             if ($err) {
-//            echo "cURL Error #:" . $err;
+//                echo "cURL Error #:" . $err;
             } else {
                 $data = json_decode($response);
                 if ($data->error->errorCode == "") {
