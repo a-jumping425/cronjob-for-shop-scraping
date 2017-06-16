@@ -78,6 +78,46 @@ class CronjobForShopScraping {
 
         if($site != null) {
             var_dump($site);
+            switch ($site['shop']) {
+                case 'ishopping':
+                    Scrape_ishopping::get_data_in_product_page($site['url']);
+                    break;
+                case 's_ishopping':
+                    Scrape_ishopping::get_data_in_search_page($site['url']);
+                    break;
+                case 'shophive':
+                    break;
+                case 's_shophive':
+                    break;
+                case 'daraz':
+                    break;
+                case 's_daraz':
+                    break;
+                case 'mega':
+                    break;
+                case 's_mega':
+                    break;
+                case 'homeshopping':
+                    break;
+                case 's_homeshopping':
+                    break;
+                case 'yayvo':
+                    break;
+                case 's_yayvo':
+                    break;
+                case 'vmart':
+                    break;
+                case 's_vmart':
+                    break;
+                case 'telemart':
+                    break;
+                case 's_telemart':
+                    break;
+                case 'myshop':
+                    break;
+                case 's_myshop':
+                    break;
+            }
         } else {
             $this->invalid_offers[] = ['pid' => $pid, 'ptitle' => $ptitle, 'offer_url' => $offer['url']];
         }
