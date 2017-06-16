@@ -156,6 +156,23 @@ class CronjobForShopScraping {
         echo "<br>invalid_offers";
         var_dump($this->invalid_offers);
 
+        // Send email with invalid offers to admin
+        if( count($this->invalid_offers) ) {
+            $to = get_option('admin_email', true);
+            $subject = 'Cronjob report - Invalid offers';
+            $message = '<p>Hi,</p><p>Please check invalid offers.</p>';
+            foreach ($this->invalid_offers as $offer) {
+                $message .= "<p>";
+                $message .= "<strong>Product ID: </strong>" . $offer['pid'] . '<br>';
+                $message .= "<strong>Product title: </strong>" . $offer['ptitle'] . '<br>';
+                $message .= "<strong>Offer url: </strong>" . $offer['offer_url'];
+                $message .= "</p>";
+            }
+            $message .= "<p>Thank you.</p>";
+            $headers = array('From: Cronjob <cronjob@techjuice.pk>', 'Content-Type: text/html; charset=UTF-8');
+            wp_mail($to, $subject, $message, $headers);
+        }
+
         echo '<br>--- Ended cronjob ---';
 
         wp_die();
