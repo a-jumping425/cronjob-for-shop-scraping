@@ -18,6 +18,23 @@ class CronjobForShopScraping {
 	}
 
     /**
+     * Get APS products from database
+     * @return array
+     */
+    private function get_aps_products() {
+        global $wpdb;
+
+        $sql = "SELECT p.id, p.post_title, m.`meta_value` AS offers
+                FROM wp_posts AS p
+                INNER JOIN wp_postmeta AS m ON m.`post_id`=p.`ID` AND m.`meta_key`='aps-product-offers' AND m.`meta_value`!=''
+                WHERE p.`post_status`='publish' AND p.id IN (32935, 33835)";
+        $products = $wpdb->get_results($sql);
+        // var_dump($products);
+
+        return $products;
+    }
+
+    /**
      * Cronjob execution
      */
 	public function cronjob_execution() {
@@ -26,6 +43,7 @@ class CronjobForShopScraping {
 
 	    echo '--- Started cronjob ---<br>';
 
+        $products = $this->get_aps_products();
 
         echo '<br>--- Ended cronjob ---';
 
