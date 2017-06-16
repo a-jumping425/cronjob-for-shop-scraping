@@ -44,6 +44,11 @@ class CronjobForShopScraping {
 	    echo '--- Started cronjob ---<br>';
 
         $products = $this->get_aps_products();
+        foreach ($products as $product) {
+            $offers = unserialize($product->offers);
+            if( !count($offers) ) continue;
+            var_dump($offers);
+        }
 
         echo '<br>--- Ended cronjob ---';
 
