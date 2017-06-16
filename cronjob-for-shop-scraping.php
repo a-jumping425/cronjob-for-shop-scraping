@@ -87,6 +87,18 @@ class CronjobForShopScraping {
      * Cronjob execution
      */
 	public function cronjob_execution() {
+        // Include libraries
+        include_once (__DIR__ . '/libs/simple_html_dom.php');
+        include_once (__DIR__ . '/libs/scrape_ishopping.php');
+        include_once (__DIR__ . '/libs/scrape_shophive.php');
+        include_once (__DIR__ . '/libs/scrape_daraz.php');
+        include_once (__DIR__ . '/libs/scrape_mega.php');
+        include_once (__DIR__ . '/libs/scrape_homeshopping.php');
+        include_once (__DIR__ . '/libs/scrape_yayvo.php');
+        include_once (__DIR__ . '/libs/scrape_vmart.php');
+        include_once (__DIR__ . '/libs/scrape_telemart.php');
+        include_once (__DIR__ . '/libs/scrape_myshop.php');
+
         // Set execution time
         set_time_limit(3600);
 
