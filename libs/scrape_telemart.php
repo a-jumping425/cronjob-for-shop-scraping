@@ -43,7 +43,6 @@ class Scrape_telemart {
 
             $min_price = 999999999999;
             foreach( $product->find('span.price') as $span ) {
-                $price = substr(trim($span->plaintext), 4);
                 $price = floatval(preg_replace('/[^\d\.]+/', '', $span->plaintext));
                 if( $min_price > $price )
                     $min_price = $price;
