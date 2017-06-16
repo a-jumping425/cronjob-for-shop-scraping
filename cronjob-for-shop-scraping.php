@@ -59,6 +59,7 @@ class CronjobForShopScraping {
 
     private function scrape_data_from_url($pid, $ptitle, $offer) {
         $site = null;
+        $product_data = 0;
 
         foreach ($this->outside_shops_search as $key => $shop_url) {
             if( strpos($offer['url'], $shop_url) !== false ) {
@@ -77,13 +78,13 @@ class CronjobForShopScraping {
         }
 
         if($site != null) {
-            var_dump($site);
+//            var_dump($site);
             switch ($site['shop']) {
                 case 'ishopping':
-                    Scrape_ishopping::get_data_in_product_page($site['url']);
+                    $product_data = Scrape_ishopping::get_data_in_product_page($site['url']);
                     break;
                 case 's_ishopping':
-                    Scrape_ishopping::get_data_in_search_page($site['url']);
+                    $product_data = Scrape_ishopping::get_data_in_search_page($site['url']);
                     break;
                 case 'shophive':
                     break;
@@ -118,8 +119,12 @@ class CronjobForShopScraping {
                 case 's_myshop':
                     break;
             }
-        } else {
+        }
+
+        if ($product_data == 0) {   // error
             $this->invalid_offers[] = ['pid' => $pid, 'ptitle' => $ptitle, 'offer_url' => $offer['url']];
+        } else {    // success
+            var_dump($product_data);
         }
     }
 
@@ -153,6 +158,9 @@ class CronjobForShopScraping {
                 $data = $this->scrape_data_from_url($product->id, $product->title, $offer);
             }
         }
+
+        echo "<br>invalid_offers";
+        var_dump($this->invalid_offers);
 
         echo '<br>--- Ended cronjob ---';
 
