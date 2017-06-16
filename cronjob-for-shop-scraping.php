@@ -122,16 +122,21 @@ class CronjobForShopScraping {
         $products = $this->get_aps_products();
         foreach ($products as $product) {
             $offers = unserialize($product->offers);
-            
+
             if( !count($offers) ) continue;
 
-//            var_dump($offers);
-
+            $min_price = 999999999999;
             foreach ($offers as $offer) {
                 $data = $this->scrape_data_from_url($product->id, $product->title, $offer);
+
                 if( !$data )
                     continue;
-                var_dump($data);
+
+                if($min_price > $data[0]) {
+                    $min_price = $data[0];
+                }
+
+//                var_dump($data);
             }
         }
 
