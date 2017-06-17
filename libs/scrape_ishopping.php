@@ -30,7 +30,7 @@ class Scrape_ishopping {
 
             curl_close($curl);
 
-            if ($err) {
+            if ($err || !$response) {
 //                echo "cURL Error #:" . $err;
                 return 0;
             }
