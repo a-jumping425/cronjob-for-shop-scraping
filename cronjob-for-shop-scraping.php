@@ -27,7 +27,7 @@ class CronjobForShopScraping {
 	public function __construct() {
         // Add ajax action for cronjob
         add_action( 'wp_ajax_cronjob_for_shop_scraping', array($this, 'cronjob_execution') );
-        add_action( 'wp_ajax_nopriv_cronjob_for_scraping', array($this, 'cronjob_execution') );
+        add_action( 'wp_ajax_nopriv_cronjob_for_shop_scraping', array($this, 'cronjob_execution') );
 	}
 
     /**
@@ -95,11 +95,33 @@ class CronjobForShopScraping {
         return $product_data;
     }
 
+    private function getRealIpAddr()
+    {
+        if (!empty($_SERVER['HTTP_CLIENT_IP']))   //check ip from share internet
+        {
+            $ip = $_SERVER['HTTP_CLIENT_IP'];
+        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR']))   //to check ip is pass from proxy
+        {
+            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        } else {
+            $ip = $_SERVER['REMOTE_ADDR'];
+        }
+        return $ip;
+    }
+
     /**
      * Cronjob execution
      */
 	public function cronjob_execution() {
 	    global $wpdb;
+
+	    // Check IP for cronjob execution permission.
+        /*
+        $ip = $this->getRealIpAddr();
+        if ($ip != '127.0.0.1') {    // Please add server ip that execute cronjob
+            return;
+        }
+        */
 
         // Include libraries
         include_once (__DIR__ . '/libs/simple_html_dom.php');
