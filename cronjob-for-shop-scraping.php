@@ -156,7 +156,7 @@ class CronjobForShopScraping {
                         $min_price = $data[0];
                     }
 
-                    $offer['price'] = $data[0];
+                    $offer['price'] = number_format($data[0]);
                     $offer['title'] = $data[1];
                 } else {
                     if($min_price > $offer['price']) {
