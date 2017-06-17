@@ -40,14 +40,14 @@ class CronjobForShopScraping {
         $sql = "SELECT p.ID AS id, p.post_title AS title, m.`meta_value` AS offers
                 FROM wp_posts AS p
                 INNER JOIN wp_postmeta AS m ON m.`post_id`=p.`ID` AND m.`meta_key`='aps-product-offers' AND m.`meta_value`!=''
-                WHERE p.`post_status`='publish' AND p.id IN (32935, 33835)";
+                WHERE p.`post_status`='publish' /*AND p.id IN (32935, 33835)*/";
         $products = $wpdb->get_results($sql);
         // var_dump($products);
 
         return $products;
     }
 
-    private function scrape_data_from_url($pid, $ptitle, $offer) {
+    private function scrape_data_from_url($offer) {
         $site = null;
         $product_data = null;
 
@@ -91,10 +91,6 @@ class CronjobForShopScraping {
             }
         }
 
-        if( !$product_data ) {   // error
-            $this->invalid_offers[] = ['pid' => $pid, 'ptitle' => $ptitle, 'offer_url' => $offer['url']];
-        }
-
         return $product_data;
     }
 
@@ -129,7 +125,7 @@ class CronjobForShopScraping {
 
             $min_price = 999999999999;
             foreach ($offers as &$offer) {
-                $data = $this->scrape_data_from_url($product->id, $product->title, $offer);
+                $data = $this->scrape_data_from_url($offer);
 //                var_dump($data);
 
                 if( $data ) {
@@ -143,6 +139,8 @@ class CronjobForShopScraping {
                     if($min_price > $offer['price']) {
                         $min_price = $offer['price'];
                     }
+
+                    $this->invalid_offers[] = ['pid' => $product->id, 'ptitle' => $product->title, 'offer_url' => $offer['url']];
                 }
             }
 //            var_dump($offers);
