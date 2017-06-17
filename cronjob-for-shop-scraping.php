@@ -40,7 +40,7 @@ class CronjobForShopScraping {
         $sql = "SELECT p.ID AS id, p.post_title AS title, m.`meta_value` AS offers
                 FROM wp_posts AS p
                 INNER JOIN wp_postmeta AS m ON m.`post_id`=p.`ID` AND m.`meta_key`='aps-product-offers' AND m.`meta_value`!=''
-                WHERE p.`post_status`='publish' /*AND p.id IN (32935, 33835)*/";
+                WHERE p.`post_status`='publish' AND p.id IN (32935)";
         $products = $wpdb->get_results($sql);
         // var_dump($products);
 
@@ -145,8 +145,16 @@ class CronjobForShopScraping {
             }
 //            var_dump($offers);
 
+            // Update offers
             $wpdb->query( $wpdb->prepare("UPDATE wp_postmeta SET meta_value = %s WHERE post_id = %d AND meta_key='aps-product-offers';", serialize($offers), $product->id) );
+            // Update price
             $wpdb->query( $wpdb->prepare("UPDATE wp_postmeta SET meta_value = %s WHERE post_id = %d AND meta_key='aps-product-price';", $min_price, $product->id) );
+
+            $str = $product->title ." price in Pakistan is Rs. ". number_format($min_price) .". You can read price, specifications, latest reviews and rooting guide on TechJuice. The price was updated on ". date('dS F, Y') .".";
+            // Update excerpt with new price
+            $wpdb->query( $wpdb->prepare("UPDATE wp_posts SET post_excerpt = %s WHERE ID = %d", $str, $product->id) );
+            // Update _yoast_wpseo_metadesc with new price
+            $wpdb->query( $wpdb->prepare("UPDATE wp_postmeta SET meta_value = %s WHERE post_id = %d AND meta_key='_yoast_wpseo_metadesc'", $str, $product->id) );
 
             unset($offer);
         }
