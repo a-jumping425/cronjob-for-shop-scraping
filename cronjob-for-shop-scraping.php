@@ -37,12 +37,13 @@ class CronjobForShopScraping {
     private function get_aps_products() {
         global $wpdb;
 
-        $sql = "SELECT p.ID AS id, p.post_title AS title, m.`meta_value` AS offers
+        $sql = "SELECT p.ID AS id, p.post_title AS title, m.`meta_value` AS offers, m1.`meta_value` AS spec_general
                 FROM wp_posts AS p
                 INNER JOIN wp_postmeta AS m ON m.`post_id`=p.`ID` AND m.`meta_key`='aps-product-offers' AND m.`meta_value`!=''
-                WHERE p.`post_status`='publish' AND p.id IN (32935)";
+                INNER JOIN wp_postmeta AS m1 ON m1.`post_id`=p.`ID` AND m1.`meta_key`='aps-attr-group-2129'
+                WHERE p.`post_status`='publish' AND p.id IN (32935, 33835)";
         $products = $wpdb->get_results($sql);
-        // var_dump($products);
+//        var_dump($products);
 
         return $products;
     }
@@ -143,6 +144,7 @@ class CronjobForShopScraping {
                     $this->invalid_offers[] = ['pid' => $product->id, 'ptitle' => $product->title, 'offer_url' => $offer['url']];
                 }
             }
+            unset($offer);
 //            var_dump($offers);
 
             // Update offers
@@ -155,8 +157,10 @@ class CronjobForShopScraping {
             $wpdb->query( $wpdb->prepare("UPDATE wp_posts SET post_excerpt = %s WHERE ID = %d", $str, $product->id) );
             // Update _yoast_wpseo_metadesc with new price
             $wpdb->query( $wpdb->prepare("UPDATE wp_postmeta SET meta_value = %s WHERE post_id = %d AND meta_key='_yoast_wpseo_metadesc'", $str, $product->id) );
-
-            unset($offer);
+            // Update specifications - General
+            $spec_general = unserialize($product->spec_general);
+            $spec_general[2069] = number_format($min_price);
+            $wpdb->query( $wpdb->prepare("UPDATE wp_postmeta SET meta_value = %s WHERE post_id = %d AND meta_key='aps-attr-group-2129'", serialize($spec_general), $product->id) );
         }
 
         echo "<br>invalid_offers";
