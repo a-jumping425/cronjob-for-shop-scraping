@@ -115,7 +115,7 @@ class CronjobForShopScraping {
         // Set execution time
         set_time_limit(3600*10);
 
-	    echo '--- Started cronjob '. date('Y-m-d H:i:s') .'---<br>';
+	    echo '--- Started cronjob ('. date('Y-m-d H:i:s') .') ---<br>';
 
         $products = $this->get_aps_products();
         foreach ($products as $product) {
@@ -171,7 +171,7 @@ class CronjobForShopScraping {
             wp_mail($to, $subject, $message, $headers);
         }
 
-        echo '<br>--- Ended cronjob ('. date('Y-m-d H:i:s') .')---';
+        echo '<br>--- Ended cronjob ('. date('Y-m-d H:i:s') .') ---';
 
         wp_die();
     }
