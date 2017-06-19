@@ -105,7 +105,7 @@ class CronjobForShopScraping {
     private function execute_multi_curl($curls_of_products) {
         $multi_curl = curl_multi_init();
 
-        foreach ($curls_of_products as $product_id => $curls_of_product) {
+        foreach ($curls_of_products as $product_index => $curls_of_product) {
             foreach ($curls_of_product as $curl) {
                 curl_multi_add_handle($multi_curl, $curl['curl']);
             }
@@ -119,46 +119,71 @@ class CronjobForShopScraping {
 
         // Get content and remove handles
         foreach ($curls_of_products as $product_index => $curls_of_product) {
-            foreach ($curls_of_product as $curl) {
-                $html = curl_multi_getcontent($curl['curl']);
+            $min_price = 999999999999;
+            foreach ($this->aps_products[$product_index]['offers'] as $offer_index => $offer) {
+                $pdata = null;
 
-                // Check curl result
-                if ($html) {
-                    switch ($curl['shop']) {
-                        case 'ishopping':
-                            $pdata = Scrape_ishopping::get_data($html);
-                            break;
-                        case 'shophive':
-                            $pdata = Scrape_shophive::get_data($html);
-                            break;
-                        case 'daraz':
-                            $pdata = Scrape_daraz::get_data($html);
-                            break;
-                        case 'mega':
-                            $pdata = Scrape_mega::get_data($html);
-                            break;
-                        case 'homeshopping':
-                            $pdata = Scrape_homeshopping::get_data($html);
-                            break;
-                        case 'yayvo':
-                            $pdata = Scrape_yayvo::get_data($html);
-                            break;
-                        case 'vmart':
-                            $pdata = Scrape_vmart::get_data($html);
-                            break;
-                        case 'telemart':
-                            $pdata = Scrape_telemart::get_data($html);
-                            break;
-                        case 'myshop':
-                            $pdata = Scrape_myshop::get_data($html);
-                            break;
+                if ($curls_of_product[$offer_index]) {  // if exist curl instance
+                    $curl = $curls_of_product[$offer_index];
+
+                    $html = curl_multi_getcontent($curl['curl']);
+
+                    // Check curl result
+                    if ($html) {
+                        switch ($curl['shop']) {
+                            case 'ishopping':
+                                $pdata = Scrape_ishopping::get_data($html);
+                                break;
+                            case 'shophive':
+                                $pdata = Scrape_shophive::get_data($html);
+                                break;
+                            case 'daraz':
+                                $pdata = Scrape_daraz::get_data($html);
+                                break;
+                            case 'mega':
+                                $pdata = Scrape_mega::get_data($html);
+                                break;
+                            case 'homeshopping':
+                                $pdata = Scrape_homeshopping::get_data($html);
+                                break;
+                            case 'yayvo':
+                                $pdata = Scrape_yayvo::get_data($html);
+                                break;
+                            case 'vmart':
+                                $pdata = Scrape_vmart::get_data($html);
+                                break;
+                            case 'telemart':
+                                $pdata = Scrape_telemart::get_data($html);
+                                break;
+                            case 'myshop':
+                                $pdata = Scrape_myshop::get_data($html);
+                                break;
+                        }
                     }
-                } else {
-                    $this->invalid_offers[] = ['pid' => $this->aps_products[$product_index]['id'], 'ptitle' => $this->aps_products[$product_index]['title'], 'offer_url' => $curl['url']];
+
+                    if ($pdata) {
+                        if($min_price > $pdata[0]) {
+                            $min_price = $pdata[0];
+                        }
+
+                        $this->aps_products[$product_index]['offers'][$offer_index]['price'] = number_format($pdata[0]);
+                        $this->aps_products[$product_index]['offers'][$offer_index]['title'] = $pdata[1];
+                    }
+
+                    curl_multi_remove_handle($multi_curl, $curl['curl']);
                 }
 
-                curl_multi_remove_handle($multi_curl, $curl['curl']);
-            }
+                if (!$pdata) {
+                    $this->invalid_offers[] = [
+                        'pid' => $this->aps_products[$product_index]['id'],
+                        'ptitle' => $this->aps_products[$product_index]['title'],
+                        'offer_url' => $offer['url']
+                    ];
+                    if($min_price > $offer['price']) {
+                        $min_price = $offer['price'];
+                    }
+                }
+            }   // foreach product offers
         }
 
         curl_multi_close($multi_curl);
@@ -274,21 +299,19 @@ class CronjobForShopScraping {
         $curls_of_products = [];
         $p_count = count($this->aps_products);
         for ($i = 0; $i < $p_count; $i++) {
-            foreach($this->aps_products[$i]['offers'] as $offer) {
+            foreach($this->aps_products[$i]['offers'] as $offer_index => $offer) {
                 // Get curl instance from url
                 $data = $this->get_curl_instance_from_url($offer['url']);
                 if ($data) {
-                    $curls_of_products[$this->aps_products[$i]['id']][] = [
+                    $curls_of_products[$i][$offer_index] = [
                         'curl' => $data['curl'],
                         'shop' => $data['shop'],
                         'url' => $offer['url']
                     ];
-                } else {    // Add invalid url
-                    $this->invalid_offers[] = ['pid' => $this->aps_products[$i]['id'], 'ptitle' => $this->aps_products[$i]['title'], 'offer_url' => $offer['url']];
                 }
             }
 
-            // Execute multi curl
+            // Execute multi curl (Ex: every 10 product)
             if( ($i+1) == $p_count || ($i+1) % $this->multi_curl_pcount == 0 ) {
                 // var_dump($curls_of_products);
 
