@@ -25,37 +25,9 @@ class Scrape_yayvo {
         return $curl;
     }
 
-    public function get_data_in_product_page($url) {
+    public function get_data($html) {
         try {
-            // echo '<br>get_data_in_search_page: ' . $url;
-
-            $curl = curl_init();
-
-            curl_setopt_array($curl, array(
-                CURLOPT_URL => $url,
-                CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36',
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_ENCODING => "",
-                CURLOPT_MAXREDIRS => 10,
-                CURLOPT_TIMEOUT => 30,
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => "GET",
-                CURLOPT_HTTPHEADER => array(
-                    "cache-control: no-cache"
-                ),
-            ));
-
-            $response = curl_exec($curl);
-            $err = curl_error($curl);
-
-            curl_close($curl);
-
-            if ($err || !$response) {
-                // echo "cURL Error #:" . $err;
-                return 0;
-            }
-
-            $html = \simplehtmldom_1_5\str_get_html($response);
+            $html = \simplehtmldom_1_5\str_get_html($html);
             $product = $html->find('div.product-shop', 0);
 
             if( !$product )
@@ -74,8 +46,6 @@ class Scrape_yayvo {
                 $availability = "In stock";
             else
                 $availability = "Out of stock";
-
-            // echo "<br>$price, $availability";
 
             return [$min_price, $availability];
         } catch (Exception $e) {

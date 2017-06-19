@@ -118,9 +118,45 @@ class CronjobForShopScraping {
         } while($running > 0);
 
         // Get content and remove handles
-        foreach ($curls_of_products as $product_id => $curls_of_product) {
+        foreach ($curls_of_products as $product_index => $curls_of_product) {
             foreach ($curls_of_product as $curl) {
-                var_dump( curl_multi_getcontent($curl['curl']) );
+                $html = curl_multi_getcontent($curl['curl']);
+
+                // Check curl result
+                if ($html) {
+                    switch ($curl['shop']) {
+                        case 'ishopping':
+                            $pdata = Scrape_ishopping::get_data($html);
+                            break;
+                        case 'shophive':
+                            $pdata = Scrape_shophive::get_data($html);
+                            break;
+                        case 'daraz':
+                            $pdata = Scrape_daraz::get_data($html);
+                            break;
+                        case 'mega':
+                            $pdata = Scrape_mega::get_data($html);
+                            break;
+                        case 'homeshopping':
+                            $pdata = Scrape_homeshopping::get_data($html);
+                            break;
+                        case 'yayvo':
+                            $pdata = Scrape_yayvo::get_data($html);
+                            break;
+                        case 'vmart':
+                            $pdata = Scrape_vmart::get_data($html);
+                            break;
+                        case 'telemart':
+                            $pdata = Scrape_telemart::get_data($html);
+                            break;
+                        case 'myshop':
+                            $pdata = Scrape_myshop::get_data($html);
+                            break;
+                    }
+                } else {
+                    $this->invalid_offers[] = ['pid' => $this->aps_products[$product_index]['id'], 'ptitle' => $this->aps_products[$product_index]['title'], 'offer_url' => $curl['url']];
+                }
+
                 curl_multi_remove_handle($multi_curl, $curl['curl']);
             }
         }

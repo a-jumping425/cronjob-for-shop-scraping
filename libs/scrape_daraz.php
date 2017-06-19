@@ -16,28 +16,9 @@ class Scrape_daraz {
         return $curl;
     }
 
-    public function get_data_in_product_page($url) {
+    public function get_data($html) {
         try {
-            // echo '<br>get_data_in_search_page: ' . $url;
-
-            $curl = curl_init($url);
-
-            curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
-
-            $response = curl_exec($curl);
-            $err = curl_error($curl);
-
-            curl_close($curl);
-
-            if ($err || !$response) {
-                // echo "cURL Error #:" . $err;
-                return 0;
-            }
-
-            $html = \simplehtmldom_1_5\str_get_html($response);
+            $html = \simplehtmldom_1_5\str_get_html($html);
             $product = $html->find('div.details-footer', 0);
 
             if( !$product )
@@ -52,8 +33,6 @@ class Scrape_daraz {
             } else {
                 $availability = "Out of stock";
             }
-
-            // echo "<br>$price, $availability";
 
             return [$price, $availability];
         } catch (Exception $e) {
