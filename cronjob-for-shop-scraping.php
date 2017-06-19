@@ -46,7 +46,7 @@ class CronjobForShopScraping {
                 FROM wp_posts AS p
                 INNER JOIN wp_postmeta AS m ON m.`post_id`=p.`ID` AND m.`meta_key`='aps-product-offers' AND m.`meta_value`!=''
                 INNER JOIN wp_postmeta AS m1 ON m1.`post_id`=p.`ID` AND m1.`meta_key`='aps-attr-group-2129'
-                WHERE p.`post_status`='publish' AND p.post_type='aps-products' /*AND p.id IN (33371, 33369)*/";
+                WHERE p.`post_status`='publish' AND p.post_type='aps-products' AND p.id IN (33371, 33369)";
         $products = $wpdb->get_results($sql);
         // var_dump($products);
 
@@ -120,7 +120,8 @@ class CronjobForShopScraping {
         // Get content and remove handles
         foreach ($curls_of_products as $product_index => $curls_of_product) {
             $min_price = 999999999999;
-            foreach ($this->aps_products[$product_index]['offers'] as $offer_index => $offer) {
+            $product = $this->aps_products[$product_index];
+            foreach ($product['offers'] as $offer_index => $offer) {
                 $pdata = null;
 
                 if ($curls_of_product[$offer_index]) {  // if exist curl instance
@@ -166,8 +167,8 @@ class CronjobForShopScraping {
                             $min_price = $pdata[0];
                         }
 
-                        $this->aps_products[$product_index]['offers'][$offer_index]['price'] = number_format($pdata[0]);
-                        $this->aps_products[$product_index]['offers'][$offer_index]['title'] = $pdata[1];
+                        $product['offers'][$offer_index]['price'] = number_format($pdata[0]);
+                        $product['offers'][$offer_index]['title'] = $pdata[1];
                     }
 
                     curl_multi_remove_handle($multi_curl, $curl['curl']);
@@ -175,18 +176,71 @@ class CronjobForShopScraping {
 
                 if (!$pdata) {
                     $this->invalid_offers[] = [
-                        'pid' => $this->aps_products[$product_index]['id'],
-                        'ptitle' => $this->aps_products[$product_index]['title'],
+                        'pid' => $product['id'],
+                        'ptitle' => $product['title'],
                         'offer_url' => $offer['url']
                     ];
+
                     if($min_price > $offer['price']) {
                         $min_price = $offer['price'];
                     }
                 }
             }   // foreach product offers
-        }
+
+            $this->update_product_in_database($product_index, $min_price);
+        }   // end products loop
 
         curl_multi_close($multi_curl);
+    }
+
+    private function update_product_in_database($product_index, $price) {
+        global $wpdb;
+
+        $product = $this->aps_products[$product_index];
+
+        // Update offers
+        $wpdb->query(
+            $wpdb->prepare(
+                "UPDATE wp_postmeta SET meta_value = %s WHERE post_id = %d AND meta_key='aps-product-offers'",
+                serialize($product['offers']),
+                $product['id']
+            )
+        );
+        // Update price
+        $wpdb->query(
+            $wpdb->prepare(
+                "UPDATE wp_postmeta SET meta_value = %s WHERE post_id = %d AND meta_key='aps-product-price';",
+                $price,
+                $product['id']
+            )
+        );
+
+        $str = $product->title . " price in Pakistan is Rs. " . number_format($price) . ". You can read price, specifications, latest reviews and rooting guide on TechJuice. The price was updated on " . date('dS F, Y') . ".";
+        // Update excerpt with new price
+        $wpdb->query(
+            $wpdb->prepare(
+                "UPDATE wp_posts SET post_excerpt = %s WHERE ID = %d",
+                $str,
+                $product['id']
+            )
+        );
+        // Update _yoast_wpseo_metadesc with new price
+        $wpdb->query(
+            $wpdb->prepare(
+                "UPDATE wp_postmeta SET meta_value = %s WHERE post_id = %d AND meta_key='_yoast_wpseo_metadesc'",
+                $str,
+                $product['id']
+            )
+        );
+        // Update specifications - General
+        $product['spec_general'][2069] = number_format($price);
+        $wpdb->query(
+            $wpdb->prepare(
+                "UPDATE wp_postmeta SET meta_value = %s WHERE post_id = %d AND meta_key='aps-attr-group-2129'",
+                serialize($product['spec_general']),
+                $product['id']
+            )
+        );
     }
 
     private function scrape_data_from_url($offer) {
