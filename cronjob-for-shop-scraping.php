@@ -216,6 +216,8 @@ class CronjobForShopScraping {
                         'curl' => $curl,
                         'url' => $offer['url']
                     ];
+                } else {    // Add invalid url
+                    $this->invalid_offers[] = ['pid' => $this->aps_products[$i]['id'], 'ptitle' => $this->aps_products[$i]['title'], 'offer_url' => $offer['url']];
                 }
             }
 
