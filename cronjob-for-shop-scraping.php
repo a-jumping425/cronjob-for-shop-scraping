@@ -46,7 +46,7 @@ class CronjobForShopScraping {
                 FROM wp_posts AS p
                 INNER JOIN wp_postmeta AS m ON m.`post_id`=p.`ID` AND m.`meta_key`='aps-product-offers' AND m.`meta_value`!=''
                 INNER JOIN wp_postmeta AS m1 ON m1.`post_id`=p.`ID` AND m1.`meta_key`='aps-attr-group-2129'
-                WHERE p.`post_status`='publish' /*AND p.id IN (33371, 33369)*/";
+                WHERE p.`post_status`='publish' AND p.post_type='aps-products' /*AND p.id IN (33371, 33369)*/";
         $products = $wpdb->get_results($sql);
         // var_dump($products);
 
