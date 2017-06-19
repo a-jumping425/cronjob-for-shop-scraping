@@ -136,7 +136,7 @@ class CronjobForShopScraping {
         include_once (__DIR__ . '/libs/scrape_myshop.php');
 
         // Set execution time
-        set_time_limit(3600*10);
+        set_time_limit(3600);
 
 	    echo '--- Started cronjob ('. date('Y-m-d H:i:s') .') ---<br>';
 
