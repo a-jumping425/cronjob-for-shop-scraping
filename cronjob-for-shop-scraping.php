@@ -91,11 +91,41 @@ class CronjobForShopScraping {
                         break;
                 }
 
-                return $curl;
+                return ['shop' => $key, 'curl' => $curl];
             }
         }
 
         return false;
+    }
+
+    /**
+     * Execute multi curl of the products
+     * @param $curls_of_products
+     */
+    private function execute_multi_curl($curls_of_products) {
+        $multi_curl = curl_multi_init();
+
+        foreach ($curls_of_products as $product_id => $curls_of_product) {
+            foreach ($curls_of_product as $curl) {
+                curl_multi_add_handle($multi_curl, $curl['curl']);
+            }
+        }
+
+        // execute the handles
+        $running = null;
+        do {
+            curl_multi_exec($multi_curl, $running);
+        } while($running > 0);
+
+        // Get content and remove handles
+        foreach ($curls_of_products as $product_id => $curls_of_product) {
+            foreach ($curls_of_product as $curl) {
+                var_dump( curl_multi_getcontent($curl['curl']) );
+                curl_multi_remove_handle($multi_curl, $curl['curl']);
+            }
+        }
+
+        curl_multi_close($multi_curl);
     }
 
     private function scrape_data_from_url($offer) {
@@ -205,15 +235,16 @@ class CronjobForShopScraping {
         }
         unset($product, $products);
 
-        $curls = [];
+        $curls_of_products = [];
         $p_count = count($this->aps_products);
         for ($i = 0; $i < $p_count; $i++) {
             foreach($this->aps_products[$i]['offers'] as $offer) {
                 // Get curl instance from url
-                $curl = $this->get_curl_instance_from_url($offer['url']);
-                if ($curl) {
-                    $curls[$this->aps_products[$i]['id']][] = [
-                        'curl' => $curl,
+                $data = $this->get_curl_instance_from_url($offer['url']);
+                if ($data) {
+                    $curls_of_products[$this->aps_products[$i]['id']][] = [
+                        'curl' => $data['curl'],
+                        'shop' => $data['shop'],
                         'url' => $offer['url']
                     ];
                 } else {    // Add invalid url
@@ -223,10 +254,15 @@ class CronjobForShopScraping {
 
             // Execute multi curl
             if( ($i+1) == $p_count || ($i+1) % $this->multi_curl_pcount == 0 ) {
-                // var_dump($curls);
-                $curls = [];
+                // var_dump($curls_of_products);
+
+                $this->execute_multi_curl($curls_of_products);
+
+                $curls_of_products = [];
             }
         }
+
+        echo '<br>--- Ended cronjob ('. date('Y-m-d H:i:s') .') ---';
 
         exit;
 
