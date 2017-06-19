@@ -7,7 +7,7 @@
 class Scrape_myshop {
     public function get_data_in_product_page($url) {
         try {
-//            echo '<br>get_data_in_search_page: ' . $url;
+            // echo '<br>get_data_in_search_page: ' . $url;
 
             $curl = curl_init();
 
@@ -31,7 +31,7 @@ class Scrape_myshop {
             curl_close($curl);
 
             if ($err || !$response) {
-//                echo "cURL Error #:" . $err;
+                // echo "cURL Error #:" . $err;
                 return 0;
             }
 
@@ -50,11 +50,11 @@ class Scrape_myshop {
 
             $availability = "In stock";     // This shop haven't stock status
 
-//            echo "<br>$price, $availability";
+            // echo "<br>$price, $availability";
 
             return [$min_price, $availability];
         } catch (Exception $e) {
-//            echo $e->getMessage();
+            // echo $e->getMessage();
             return 0;
         }
     }

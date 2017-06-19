@@ -7,7 +7,7 @@
 class Scrape_daraz {
     public function get_data_in_product_page($url) {
         try {
-//            echo '<br>get_data_in_search_page: ' . $url;
+            // echo '<br>get_data_in_search_page: ' . $url;
 
             $curl = curl_init($url);
 
@@ -22,7 +22,7 @@ class Scrape_daraz {
             curl_close($curl);
 
             if ($err || !$response) {
-//                echo "cURL Error #:" . $err;
+                // echo "cURL Error #:" . $err;
                 return 0;
             }
 
@@ -42,11 +42,11 @@ class Scrape_daraz {
                 $availability = "Out of stock";
             }
 
-//            echo "<br>$price, $availability";
+            // echo "<br>$price, $availability";
 
             return [$price, $availability];
         } catch (Exception $e) {
-//            echo $e->getMessage();
+            // echo $e->getMessage();
             return 0;
         }
     }

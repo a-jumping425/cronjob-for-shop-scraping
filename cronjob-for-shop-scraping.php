@@ -41,9 +41,9 @@ class CronjobForShopScraping {
                 FROM wp_posts AS p
                 INNER JOIN wp_postmeta AS m ON m.`post_id`=p.`ID` AND m.`meta_key`='aps-product-offers' AND m.`meta_value`!=''
                 INNER JOIN wp_postmeta AS m1 ON m1.`post_id`=p.`ID` AND m1.`meta_key`='aps-attr-group-2129'
-                WHERE p.`post_status`='publish' AND p.id IN (32935, 33835)";
+                WHERE p.`post_status`='publish' AND p.id IN (33371, 33369)";
         $products = $wpdb->get_results($sql);
-//        var_dump($products);
+        // var_dump($products);
 
         return $products;
     }
@@ -60,7 +60,7 @@ class CronjobForShopScraping {
         }
 
         if($site != null) {
-//            var_dump($site);
+            // var_dump($site);
             switch ($site['shop']) {
                 case 'ishopping':
                     $product_data = Scrape_ishopping::get_data_in_product_page($site['url']);
@@ -149,7 +149,7 @@ class CronjobForShopScraping {
             $min_price = 999999999999;
             foreach ($offers as &$offer) {
                 $data = $this->scrape_data_from_url($offer);
-//                var_dump($data);
+                // var_dump($data);
 
                 if( $data ) {
                     if($min_price > $data[0]) {
@@ -167,7 +167,7 @@ class CronjobForShopScraping {
                 }
             }
             unset($offer);
-//            var_dump($offers);
+            // var_dump($offers);
 
             // Update offers
             $wpdb->query( $wpdb->prepare("UPDATE wp_postmeta SET meta_value = %s WHERE post_id = %d AND meta_key='aps-product-offers';", serialize($offers), $product->id) );

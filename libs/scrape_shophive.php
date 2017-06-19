@@ -7,7 +7,7 @@
 class Scrape_shophive {
     public function get_data_in_product_page($url) {
         try {
-//            echo '<br>get_data_in_search_page: ' . $url;
+            // echo '<br>get_data_in_search_page: ' . $url;
 
             $curl = curl_init();
 
@@ -31,7 +31,7 @@ class Scrape_shophive {
             curl_close($curl);
 
             if ($err || !$response) {
-//                echo "cURL Error #:" . $err;
+                // echo "cURL Error #:" . $err;
                 return 0;
             }
 
@@ -50,11 +50,11 @@ class Scrape_shophive {
 
             $availability = trim( $product->find('div.sku span', 1)->plaintext );
 
-//            echo "<br>$price, $availability";
+            // echo "<br>$price, $availability";
 
             return [$min_price, $availability];
         } catch (Exception $e) {
-//            echo $e->getMessage();
+            // echo $e->getMessage();
             return 0;
         }
     }

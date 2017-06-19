@@ -7,7 +7,7 @@
 class Scrape_homeshopping {
     public function get_data_in_product_page($url) {
         try {
-//            echo '<br>get_data_in_search_page: ' . $url;
+            // echo '<br>get_data_in_search_page: ' . $url;
 
             $curl = curl_init();
 
@@ -31,7 +31,7 @@ class Scrape_homeshopping {
             curl_close($curl);
 
             if ($err || !$response) {
-//                echo "cURL Error #:" . $err;
+                // echo "cURL Error #:" . $err;
                 return 0;
             }
 
@@ -46,11 +46,11 @@ class Scrape_homeshopping {
 
             $availability = trim( $product->find('div.detlist2 span', 0)->plaintext );
 
-//            echo "<br>$price, $availability";
+            // echo "<br>$price, $availability";
 
             return [$price, $availability];
         } catch (Exception $e) {
-//            echo $e->getMessage();
+            // echo $e->getMessage();
             return 0;
         }
     }
