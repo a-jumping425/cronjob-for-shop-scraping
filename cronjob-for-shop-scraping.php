@@ -24,6 +24,9 @@ class CronjobForShopScraping {
 
     private $invalid_offers = [];
 
+    // The number of products for parallel curl
+    private $multi_curl_pcount = 10;
+
 	public function __construct() {
         // Add ajax action for cronjob
         add_action( 'wp_ajax_cronjob_for_shop_scraping', array($this, 'cronjob_execution') );
