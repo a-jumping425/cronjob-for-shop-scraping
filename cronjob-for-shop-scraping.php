@@ -53,6 +53,51 @@ class CronjobForShopScraping {
         return $products;
     }
 
+    /**
+     * Get curl instance from url
+     * @param $url
+     */
+    private function get_curl_instance_from_url($url) {
+        // Check validation of url
+        foreach ($this->outside_shops as $key => $shop_url) {
+            if( strpos($url, $shop_url) !== false ) {
+                switch ($key) {
+                    case 'ishopping':
+                        $curl = Scrape_ishopping::get_curl_instance($url);
+                        break;
+                    case 'shophive':
+                        $curl = Scrape_shophive::get_curl_instance($url);
+                        break;
+                    case 'daraz':
+                        $curl = Scrape_daraz::get_curl_instance($url);
+                        break;
+                    case 'mega':
+                        $curl = Scrape_mega::get_curl_instance($url);
+                        break;
+                    case 'homeshopping':
+                        $curl = Scrape_homeshopping::get_curl_instance($url);
+                        break;
+                    case 'yayvo':
+                        $curl = Scrape_yayvo::get_curl_instance($url);
+                        break;
+                    case 'vmart':
+                        $curl = Scrape_vmart::get_curl_instance($url);
+                        break;
+                    case 'telemart':
+                        $curl = Scrape_telemart::get_curl_instance($url);
+                        break;
+                    case 'myshop':
+                        $curl = Scrape_myshop::get_curl_instance($url);
+                        break;
+                }
+
+                return $curl;
+            }
+        }
+
+        return false;
+    }
+
     private function scrape_data_from_url($offer) {
         $site = null;
         $product_data = null;
@@ -145,9 +190,41 @@ class CronjobForShopScraping {
 
 	    echo '--- Started cronjob ('. date('Y-m-d H:i:s') .') ---<br>';
 
-        $this->aps_products = $this->get_aps_products();
-        // var_dump($this->aps_products);
+        $products = $this->get_aps_products();
+        foreach ($products as $product) {
+            $offers = unserialize($product->offers);
 
+            if (!count($offers)) continue;
+
+            $this->aps_products[] = [
+                'id' => $product->id,
+                'title' => $product->title,
+                'offers' => $offers,
+                'spec_general' => unserialize($product->spec_general)
+            ];
+        }
+        unset($product, $products);
+
+        $curls = [];
+        $p_count = count($this->aps_products);
+        for ($i = 0; $i < $p_count; $i++) {
+            foreach($this->aps_products[$i]['offers'] as $offer) {
+                // Get curl instance from url
+                $curl = $this->get_curl_instance_from_url($offer['url']);
+                if ($curl) {
+                    $curls[$this->aps_products[$i]['id']][] = [
+                        'curl' => $curl,
+                        'url' => $offer['url']
+                    ];
+                }
+            }
+
+            // Execute multi curl
+            if( ($i+1) == $p_count || ($i+1) % $this->multi_curl_pcount == 0 ) {
+                // var_dump($curls);
+                $curls = [];
+            }
+        }
 
         exit;
 
