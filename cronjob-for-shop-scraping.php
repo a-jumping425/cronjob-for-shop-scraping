@@ -33,7 +33,27 @@ class CronjobForShopScraping {
         // Add ajax action for cronjob
         add_action( 'wp_ajax_cronjob_for_shop_scraping', array($this, 'cronjob_execution') );
         add_action( 'wp_ajax_nopriv_cronjob_for_shop_scraping', array($this, 'cronjob_execution') );
+
+        // Add new recurrence for wp_schedule_event
+        add_filter( 'cron_schedules', array($this, 'add_cron_recurrence_interval') );
+
+        // WP Scheduled Event
+        // wp_clear_scheduled_hook( 'cronjob_for_shop_scraping_hook' );
+        add_action('cronjob_for_shop_scraping_hook', array($this, 'cronjob_execution'));
+        if (! wp_next_scheduled ( 'cronjob_for_shop_scraping_hook' )) {
+            wp_schedule_event(mktime(5, 0, 0, 6, 19, 2017), 'every_15_seconds', 'cronjob_for_shop_scraping_hook');
+            // wp_schedule_event(mktime(5, 0, 0, 6, 19, 2017), 'daily', 'cronjob_for_shop_scraping_hook');
+        }
 	}
+
+    public function add_cron_recurrence_interval( $schedules ) {
+        $schedules['every_15_seconds'] = array(
+            'interval'  => 15,
+            'display'   => __( 'Every 15 Seconds', 'textdomain' )
+        );
+
+        return $schedules;
+    }
 
     /**
      * Get APS products from database
@@ -262,6 +282,8 @@ class CronjobForShopScraping {
      */
 	public function cronjob_execution() {
 	    global $wpdb;
+
+        // $myfile = fopen(__DIR__ . '/' . date('Y-m-d_His') . ".txt", "w");    // Check cron job execution
 
 	    // Check IP for cronjob execution permission.
         /*
