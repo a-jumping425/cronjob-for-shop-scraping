@@ -41,8 +41,8 @@ class CronjobForShopScraping {
         // wp_clear_scheduled_hook( 'cronjob_for_shop_scraping_hook' );
         add_action('cronjob_for_shop_scraping_hook', array($this, 'cronjob_execution'));
         if (! wp_next_scheduled ( 'cronjob_for_shop_scraping_hook' )) {
-            wp_schedule_event(mktime(5, 0, 0, 6, 19, 2017), 'every_15_seconds', 'cronjob_for_shop_scraping_hook');
-            // wp_schedule_event(mktime(5, 0, 0, 6, 19, 2017), 'daily', 'cronjob_for_shop_scraping_hook');
+            // wp_schedule_event(mktime(5, 0, 0, 6, 19, 2017), 'every_15_seconds', 'cronjob_for_shop_scraping_hook');
+            wp_schedule_event(mktime(5, 0, 0, 6, 19, 2017), 'daily', 'cronjob_for_shop_scraping_hook');
         }
 	}
 
@@ -261,6 +261,9 @@ class CronjobForShopScraping {
                 $product['id']
             )
         );
+
+        // Update the cronjob date of product.
+        update_post_meta($product['id'], 'cronjob_execution_date', time());
     }
 
     private function getRealIpAddr()
@@ -284,6 +287,7 @@ class CronjobForShopScraping {
 	    global $wpdb;
 
         // $myfile = fopen(__DIR__ . '/' . date('Y-m-d_His') . ".txt", "w");    // Check cron job execution
+        // return;
 
 	    // Check IP for cronjob execution permission.
         /*
