@@ -41,7 +41,7 @@ class CronjobForShopScraping {
         // wp_clear_scheduled_hook( 'cronjob_for_shop_scraping_hook' );
         add_action('cronjob_for_shop_scraping_hook', array($this, 'cronjob_execution'));
         if (! wp_next_scheduled ( 'cronjob_for_shop_scraping_hook' )) {
-            // wp_schedule_event(mktime(5, 0, 0, 6, 19, 2017), 'every_15_seconds', 'cronjob_for_shop_scraping_hook');
+            // wp_schedule_event(mktime(5, 0, 0, 6, 19, 2017), 'every_30_minutes', 'cronjob_for_shop_scraping_hook');
             wp_schedule_event(mktime(5, 0, 0, 6, 19, 2017), 'daily', 'cronjob_for_shop_scraping_hook');
         }
 	}
@@ -50,6 +50,11 @@ class CronjobForShopScraping {
         $schedules['every_15_seconds'] = array(
             'interval'  => 15,
             'display'   => __( 'Every 15 Seconds', 'textdomain' )
+        );
+
+        $schedules['every_30_minutes'] = array(
+            'interval'  => 1800,
+            'display'   => __( 'Every 30 Minutes', 'textdomain' )
         );
 
         return $schedules;
