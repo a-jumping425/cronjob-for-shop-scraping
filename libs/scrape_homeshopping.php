@@ -33,7 +33,8 @@ class Scrape_homeshopping {
             if( !$product )
                 return 0;
 
-            $price = $product->find('em.ProductPrice', 0)->plaintext;
+            $price_count = count( $product->find('em.ProductPrice') );
+            $price = $product->find('em.ProductPrice', $price_count-1)->plaintext;
             $price = floatval(preg_replace('/[^\d\.]+/', '', $price));
 
             $availability = trim( $product->find('div.detlist2 span', 0)->plaintext );

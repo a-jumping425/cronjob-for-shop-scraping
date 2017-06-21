@@ -34,7 +34,7 @@ class Scrape_shophive {
                 return 0;
 
             $min_price = 999999999999;
-            foreach( $product->find('span.price') as $span ) {
+            foreach( $product->find('div.price-box span.price') as $span ) {
                 $price = floatval(preg_replace('/[^\d\.]+/', '', $span->plaintext));
                 if( $min_price > $price )
                     $min_price = $price;
