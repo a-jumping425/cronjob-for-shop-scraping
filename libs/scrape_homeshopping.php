@@ -38,6 +38,11 @@ class Scrape_homeshopping {
             $price = floatval(preg_replace('/[^\d\.]+/', '', $price));
 
             $availability = trim( $product->find('div.detlist2 span', 0)->plaintext );
+            foreach ($product->find('div.detlist2 a') as $a_tag) {
+                if (strpos($a_tag->style, 'display:none') !== false && strpos($a_tag->style, 'display: none') === false) {
+                    $availability = "Out of stock";
+                }
+            }
 
             return [$price, $availability];
         } catch (Exception $e) {
