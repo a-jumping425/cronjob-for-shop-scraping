@@ -1,1 +1,1 @@
-linguist-language=Wordpress
+*.php linguist-language=Wordpress
