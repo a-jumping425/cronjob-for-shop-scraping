@@ -40,9 +40,9 @@ class CronjobForShopScraping {
         // WP Scheduled Event
         // wp_clear_scheduled_hook( 'cronjob_for_shop_scraping_hook' );
         add_action('cronjob_for_shop_scraping_hook', array($this, 'cronjob_execution'));
-        if (! wp_next_scheduled ( 'cronjob_for_shop_scraping_hook' )) {
-            // wp_schedule_event(mktime(5, 0, 0, 6, 19, 2017), 'every_30_minutes', 'cronjob_for_shop_scraping_hook');
-            wp_schedule_event(mktime(5, 0, 0, 6, 19, 2017), 'daily', 'cronjob_for_shop_scraping_hook');
+        if (!wp_next_scheduled('cronjob_for_shop_scraping_hook')) {
+            // wp_schedule_event(strtotime('05:00:00'), 'every_30_minutes', 'cronjob_for_shop_scraping_hook');
+            wp_schedule_event(strtotime('05:00:00'), 'daily', 'cronjob_for_shop_scraping_hook');
         }
 	}
 
