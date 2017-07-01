@@ -144,7 +144,7 @@ class CronjobForShopScraping {
 
         // Get content and remove handles
         foreach ($curls_of_products as $product_index => $curls_of_product) {
-            $min_price = 999999999999;
+            $min_price = 999999999999999;
             $product = &$this->aps_products[$product_index];
             foreach ($product['offers'] as $offer_index => $offer) {
                 $pdata = null;
@@ -186,6 +186,7 @@ class CronjobForShopScraping {
                                 break;
                         }
                     }
+                    // var_dump($pdata);
 
                     if ($pdata) {
                         if ($pdata[0] == 0)
@@ -230,13 +231,17 @@ class CronjobForShopScraping {
     private function update_product_in_database($product_index, $price) {
         global $wpdb;
 
+        $product = $this->aps_products[$product_index];
+
         if ($price < 999999999999999) {
             $formated_price = number_format($price);
+            $product_price = $price;
+            $str = $product['title'] . " price in Pakistan is Rs. " . $formated_price . ". You can read price, specifications, latest reviews and rooting guide on TechJuice. The price was updated on " . date('dS F, Y') . ".";
         } else {
             $price = $formated_price = 'Deactivated';
+            $product_price = -1;
+            $str = $product['title'] . " price in Pakistan is not available. You can read price, specifications, latest reviews and rooting guide on TechJuice. The price was updated on " . date('dS F, Y') . ".";
         }
-
-        $product = $this->aps_products[$product_index];
 
         // Update offers
         $wpdb->query(
@@ -246,16 +251,16 @@ class CronjobForShopScraping {
                 $product['id']
             )
         );
-        // Update price
+
+        // Update price of product
         $wpdb->query(
             $wpdb->prepare(
                 "UPDATE wp_postmeta SET meta_value = %s WHERE post_id = %d AND meta_key='aps-product-price'",
-                $price,
+                $product_price,
                 $product['id']
             )
         );
 
-        $str = $product['title'] . " price in Pakistan is Rs. " . $formated_price . ". You can read price, specifications, latest reviews and rooting guide on TechJuice. The price was updated on " . date('dS F, Y') . ".";
         // Update excerpt with new price
         $wpdb->query(
             $wpdb->prepare(
@@ -264,6 +269,7 @@ class CronjobForShopScraping {
                 $product['id']
             )
         );
+
         // Update _yoast_wpseo_metadesc with new price
         $wpdb->query(
             $wpdb->prepare(
@@ -272,8 +278,9 @@ class CronjobForShopScraping {
                 $product['id']
             )
         );
+
         // Update specifications - General
-        $product['spec_general'][2069] = $formated_price;
+        $product['spec_general'][2069] = $formated_price. " PKR";
         $wpdb->query(
             $wpdb->prepare(
                 "UPDATE wp_postmeta SET meta_value = %s WHERE post_id = %d AND meta_key='aps-attr-group-2129'",
